@@ -16,17 +16,15 @@ class OrthogonalRegularizer(torch.nn.Module):
 
     """ Enforces parameter norm to be close to unitary """
 
-    def __init__(self, reg, device):
+    def __init__(self, reg):
         """ Initialize the loss object
 
         Args:
             reg     :   The regularization weight
-            device  :   The device to which to move the tensors
 
         """
         super().__init__()
         self.reg = reg
-        self.device = device
 
     def forward(self, model):
         """ Forward pass for calculating the regularization term.
@@ -46,6 +44,6 @@ class OrthogonalRegularizer(torch.nn.Module):
                 if "bias" not in name:
                     param_flat = param.view(param.shape[0], -1)
                     sym = torch.mm(param_flat, torch.t(param_flat))
-                    sym -= torch.eye(param_flat.shape[0]).to(self.device)
+                    sym -= torch.eye(param_flat.shape[0]).to(param.device)
                     orth_loss += self.reg * torch.mul(sym, sym).sum()
         return orth_loss
