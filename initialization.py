@@ -9,7 +9,9 @@
 ###
 
 
+from typing import Any
 from typing import Callable
+from typing import Protocol
 
 import torch
 import torch.nn as nn
@@ -41,10 +43,13 @@ def init_recurrent_weights(model: nn.Module) -> None:
                     param.data.fill_(0)
 
 
+class WeightInitCallback(Protocol):
+    def __call__(self, t:torch.Tensor, *args:Any) -> None: ...
+
+
 def init_weight(
         module: nn.Module, name: str,
-        init_func: Callable[[torch.Tensor, ...], None] = nn.init.normal_
-    ) -> None:
+        init_func: WeightInitCallback = nn.init.normal_) -> None:
     """ Apply init function to the weight parameter of the module matching name
 
     Args:
