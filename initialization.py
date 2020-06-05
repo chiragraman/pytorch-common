@@ -11,6 +11,7 @@
 
 from typing import Any
 from typing import Callable
+from typing import List
 from typing import Protocol
 
 import torch
@@ -60,3 +61,31 @@ def init_weight(
     classname = module.__class__.__name__
     if classname.find(name) != -1:
         init_func(module.weight)
+
+
+def hidden_layers_list(ninp: int, nhid: int, nlayers: int) -> List[nn.Module]:
+    """ Construct the layers list for intermediate fully connected layers.
+
+    This is useful in situations where a block of FCs need to be constructed
+    for a submodule. And example usecase :
+
+        layers = hidden_layers_list(ninp, nhid, nlayers)
+        layers.append(nn.Linear(nhid, nout))
+        fc_module = nn.Sequential(*layers)
+
+    Args:
+        ninp    --  Dimension of input features
+        nhid    --  Dimension of hidden layers
+        nout    --  Dimension of output layers
+        nlayers --  Number of hidden layers
+
+    Returns:
+        The list of layers; used as an input to nn.Sequential
+
+    """
+    layers = [nn.Linear(ninp, nhid), nn.ReLU(inplace=True)]
+    layers.extend(
+        [item for _ in range(1, nlayers)
+         for item in [nn.Linear(nhid, nhid), nn.ReLU(inplace=True)]]
+    )
+    return layers
