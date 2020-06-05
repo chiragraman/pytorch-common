@@ -22,7 +22,7 @@ def init_recurrent_weights(model: nn.Module) -> None:
     """ Initialize the recurrent weights of the module
 
     Args:
-        model   : The module for which to initialize weights
+        model   -- The module for which to initialize weights
     """
 
     def init_recurrent_param(param, n_chunks, init_func=nn.init.kaiming_normal_):
@@ -54,9 +54,9 @@ def init_weight(
     """ Apply init function to the weight parameter of the module matching name
 
     Args:
-        model       :   The nn.Module containing modules to iterate over
-        name        :   The value of __class__.__name__ to match
-        init_func   :   The init function to apply
+        model       --   The nn.Module containing modules to iterate over
+        name        --   The value of __class__.__name__ to match
+        init_func   --   The init function to apply
     """
     classname = module.__class__.__name__
     if classname.find(name) != -1:
