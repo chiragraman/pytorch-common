@@ -9,12 +9,15 @@
 ###
 
 
-from typing import Any
-from typing import Callable
-from typing import List
-from typing import Optional
-from typing import Protocol
-from typing import TypeVar
+from typing import (
+    Any,
+    Callable,
+    List,
+    Optional,
+    Protocol,
+    Type,
+    TypeVar
+)
 
 import torch
 import torch.nn as nn
@@ -26,14 +29,14 @@ CHUNKS = {nn.GRU: 3, nn.LSTM: 4, nn.RNN: 1}
 ## General Utilities for initialization ---------------------------------------
 
 
-Activation = TypeVar("Activation", str, nn.Module)
+Activation = TypeVar("Activation", str, nn.Module, Type[nn.Module])
 
 
 def _activation_name(activation: Activation) -> str:
     """ Return a string corresponding to the name of the activation function.
 
     Args:
-        activation  --  string or a `torch.nn.modules.activation`
+        activation  --  string or a `torch.nn.modules.activation` or its type
 
     """
     if isinstance(activation, str):
@@ -44,13 +47,13 @@ def _activation_name(activation: Activation) -> str:
         nn.ReLU: "relu",
         nn.Tanh: "tanh",
         nn.Sigmoid: "sigmoid",
-        nn.Softmax: "sigmoid",
+        nn.Softmax: "softmax",
     }
 
     ret = None
     for k, v in mapper.items():
-        if isinstance(activation, k):
-            ret = k
+        if isinstance(activation, k) or activation == k:
+            ret = v
 
     if ret is None:
         raise ValueError("Unkown given activation type : {}".format(activation))
@@ -97,7 +100,7 @@ def init_linear_weight(
             nn.init.kaiming_uniform_(weight, a=a, nonlinearity="leaky_relu")
         elif act_name == "relu":
             nn.init.kaiming_uniform_(weight, nonlinearity="relu")
-        elif act_name in ["sigmoid", "tanh"]:
+        elif act_name in ["sigmoid", "softmax", "tanh"]:
             nn.init.xavier_uniform_(weight, gain=_gain(activation))
 
 
@@ -105,9 +108,10 @@ def init_linear_weight(
 
 class WeightInitCallback(Protocol):
     """ Interface for a general initialization function """
-    def __call__(self, t:torch.Tensor, *args:Any) -> None: ...
+    def __call__(self, t: torch.Tensor, *args: Any) -> None: ...
 
 
+@torch.no_grad()
 def init_weight(
         module: nn.Module, name: str,
         init_func: WeightInitCallback = nn.init.normal_) -> None:
@@ -149,31 +153,3 @@ def initialize_params(
         if m.bias is not None:
             m.bias.data.fill_(0)
         init_linear_weight(m.weight, linear_activation)
-
-
-def hidden_layers_list(ninp: int, nhid: int, nlayers: int) -> List[nn.Module]:
-    """ Construct the layers list for intermediate fully connected layers.
-
-    This is useful in situations where a block of FCs need to be constructed
-    for a submodule. And example usecase :
-
-        layers = hidden_layers_list(ninp, nhid, nlayers)
-        layers.append(nn.Linear(nhid, nout))
-        fc_module = nn.Sequential(*layers)
-
-    Args:
-        ninp    --  Dimension of input features
-        nhid    --  Dimension of hidden layers
-        nout    --  Dimension of output layers
-        nlayers --  Number of hidden layers
-
-    Returns:
-        The list of layers; used as an input to nn.Sequential
-
-    """
-    layers = [nn.Linear(ninp, nhid), nn.ReLU(inplace=True)]
-    layers.extend(
-        [item for _ in range(1, nlayers)
-         for item in [nn.Linear(nhid, nhid), nn.ReLU(inplace=True)]]
-    )
-    return layers
