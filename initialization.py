@@ -9,15 +9,7 @@
 ###
 
 
-from typing import (
-    Any,
-    Callable,
-    List,
-    Optional,
-    Protocol,
-    Type,
-    TypeVar
-)
+from typing import Any, Callable, List, Optional, Protocol, Type, TypeVar
 
 import torch
 import torch.nn as nn
@@ -153,3 +145,11 @@ def initialize_params(
         if m.bias is not None:
             m.bias.data.fill_(0)
         init_linear_weight(m.weight, linear_activation)
+
+
+def init_torch(seed: int) -> None:
+    """ Initialise torch with a seed """
+    torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.enabled = True
