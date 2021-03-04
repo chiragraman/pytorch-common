@@ -39,7 +39,7 @@ def count_parameters_by_module(model: nn.Module) -> Tuple[PrettyTable, int]:
 def summarize(model: nn.Module) -> None:
     """ Summarize the model architecture and parameter count by module """
     table, total_params = count_parameters_by_module(model)
-    logging.info(
+    logging.debug(
         "\n[*] #============================= MODEL SUMMARY =============================#"
         "\n[*] ===== ARCHITECTURE =====\n%s\n"
         "\n[*] ===== PARAMETERS =====\n%s\n"
