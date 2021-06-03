@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2021 Chirag Raman
+Copyright (c) 2021 Chirag Raman, http://chiragraman.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
