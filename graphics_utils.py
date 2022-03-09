@@ -49,9 +49,8 @@ def convert_loc_rh_y_down_to_z_up(vectors: np.array) -> np.array:
     """ Convert a location in a right handed y-down system to right handed z-up.
 
     This is done by rotating around the x axis, or equivalent to:
-        float z = position.Z;
-        position.Z = -position.Y;
-        position.Y = z;
+        new_y = - old_z;
+        new_z = old_y
 
     Args:
         vectors --  data in rh -y up system (nframes, 3)
